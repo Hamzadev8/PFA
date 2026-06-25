@@ -43,15 +43,8 @@ npm-debug.log*
 Thumbs.db
 desktop.ini
 
-# ── Artefacts du rapport / présentation (NON versionnés) ──────
-# Décommentez/supprimez ces lignes si vous voulez les committer.
-*.docx
-*.pptx
+# ── Fichiers temporaires Office (verrous ~$...) ───────────────
 ~$*
-generate_ppt.py
-gen_rapport.py
-figures/
-R.png
 
 # ── data/ EST versionné (datasets + notebooks), SAUF : ────────
 data/.ipynb_checkpoints/
