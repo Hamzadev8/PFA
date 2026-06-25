@@ -36,7 +36,6 @@ npm-debug.log*
 .ipynb_checkpoints/
 
 # ── Outils & IDE ──────────────────────────────────────────────
-.claude/
 .vscode/
 .idea/
 .DS_Store
