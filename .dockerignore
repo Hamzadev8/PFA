@@ -1,0 +1,12 @@
+.git
+.gitignore
+*.md
+data
+plan_rapport*.docx
+Rapport_PFA*.docx
+gen_rapport.py
+frontend/node_modules
+frontend/.next
+**/__pycache__
+**/.venv
+.env

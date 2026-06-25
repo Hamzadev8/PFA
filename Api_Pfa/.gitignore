@@ -1,0 +1,15 @@
+# Secrets & configuration locale
+.env
+.env.*
+!.env.example
+
+# Données d'authentification (contient des hash de mots de passe)
+users.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/

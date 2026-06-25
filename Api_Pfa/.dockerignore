@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Secrets & données locales (recréées au runtime)
+.env
+.env.*
+!.env.example
+users.json
+
+# Divers
+.git/
+.gitignore
+*.md
+check_db.py

@@ -1,0 +1,57 @@
+# ═══════════════════════════════════════════════════════════════
+#  .gitignore racine — Plateforme IA & BI (PFA 2025-2026)
+#  Les .gitignore de Api_Pfa/ et frontend/ complètent ce fichier.
+# ═══════════════════════════════════════════════════════════════
+
+# ── Secrets & environnement — NE JAMAIS committer ──────────────
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+# users.json contient des hash de mots de passe
+Api_Pfa/users.json
+
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Node / Next.js ────────────────────────────────────────────
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+
+# ── Notebooks ─────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Outils & IDE ──────────────────────────────────────────────
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Artefacts du rapport / présentation (NON versionnés) ──────
+# Décommentez/supprimez ces lignes si vous voulez les committer.
+*.docx
+*.pptx
+~$*
+generate_ppt.py
+gen_rapport.py
+figures/
+R.png
+
+# ── data/ EST versionné (datasets + notebooks), SAUF : ────────
+data/.ipynb_checkpoints/

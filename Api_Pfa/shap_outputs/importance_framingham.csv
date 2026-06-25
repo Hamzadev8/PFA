@@ -1,0 +1,16 @@
+feature,shap_mean,disease
+age,0.12761777565081123,framingham
+cigsPerDay,0.043356679101369686,framingham
+male,0.04158397272352757,framingham
+sysBP,0.03263488949403165,framingham
+totChol,0.01855070734775618,framingham
+diaBP,0.017221732634763794,framingham
+glucose,0.015709057604996902,framingham
+prevalentHyp,0.011304833425199525,framingham
+currentSmoker,0.010984683543446769,framingham
+heartRate,0.009171428638283439,framingham
+education,0.006965932108860702,framingham
+BPMeds,0.004840186064795005,framingham
+diabetes,0.0011730817540857865,framingham
+prevalentStroke,0.0007433559992775865,framingham
+BMI,0.0006597262687013789,framingham

@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design tokens — Tailwind v4 (@theme)
+   Direction : SaaS médical sombre, minimal, rigueur clinique.
+   Inspiration Linear / Vercel — surfaces profondes, bordures
+   hairline, accent cobalt sobre, vert émeraude = validation.
+   ============================================================ */
+@theme {
+  /* Typographie (variables injectées par next/font dans layout.js) */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Surfaces — du plus profond au plus élevé */
+  --color-canvas:   #030712;  /* fond de page */
+  --color-panel:    #080b13;  /* carte / panneau */
+  --color-panel-2:  #0c111b;  /* surface interne / champ */
+  --color-hover:    #11161f;  /* survol de surface */
+
+  /* Bordures — fines et nettes */
+  --color-line:     #1b2230;  /* hairline par défaut */
+  --color-line-2:   #2a3344;  /* bordure accentuée / active */
+
+  /* Texte */
+  --color-ink:      #f1f5f9;  /* texte principal */
+  --color-muted:    #94a3b8;  /* texte secondaire */
+  --color-faint:    #64748b;  /* métadonnées */
+
+  /* Accent — cobalt sobre */
+  --color-brand:        #2563eb;
+  --color-brand-bright: #3b82f6;
+  --color-brand-soft:   #1d4ed8;
+
+  /* Rayons & ombres cohérents */
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Chiffres tabulaires pour les données cliniques */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+  }
+
+  /* Sélection sobre */
+  ::selection {
+    background-color: rgba(37, 99, 235, 0.30);
+    color: #fff;
+  }
+
+  /* Focus accessible global (fallback ; les composants affinent) */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-bright);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ============================================================
+   Surfaces réutilisables (remplacent l'ancien glassmorphism,
+   noms conservés pour compat avec les pages non refondues)
+   ============================================================ */
+.glass,
+.glass-strong {
+  background-color: color-mix(in srgb, var(--color-panel) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+}
+
+.glass-card {
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-line);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+  border-color: var(--color-line-2);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.8);
+}
+
+/* Lueurs d'accent — discrètes, bordure + halo léger (pas de néon AI) */
+.glow-blue:hover   { border-color: rgba(59, 130, 246, 0.40); box-shadow: 0 0 0 1px rgba(59,130,246,0.10), 0 18px 40px -24px rgba(59,130,246,0.35); }
+.glow-green:hover  { border-color: rgba(16, 185, 129, 0.40); box-shadow: 0 0 0 1px rgba(16,185,129,0.10), 0 18px 40px -24px rgba(16,185,129,0.35); }
+.glow-red:hover    { border-color: rgba(244, 63, 94, 0.40);  box-shadow: 0 0 0 1px rgba(244,63,94,0.10),  0 18px 40px -24px rgba(244,63,94,0.35); }
+.glow-purple:hover { border-color: rgba(99, 102, 241, 0.40); box-shadow: 0 0 0 1px rgba(99,102,241,0.10), 0 18px 40px -24px rgba(99,102,241,0.35); }
+
+/* ============================================================
+   Skeleton soigné (shimmer) — remplace les spinners génériques
+   ============================================================ */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-panel-2);
+  border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.045) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* ============================================================
+   Animations (conservées pour compat ; utilisées par les
+   pages non encore migrées vers Framer Motion)
+   ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.32; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes pulseCritical {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.30); }
+  50%      { box-shadow: 0 0 14px 3px rgba(244, 63, 94, 0.14); }
+}
+
+.animate-fade-in-up    { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-fade-in       { animation: fadeIn 0.4s ease-out forwards; }
+.animate-float         { animation: float 5s ease-in-out infinite; }
+.animate-pulse-glow    { animation: pulseGlow 6s ease-in-out infinite; }
+.animate-slide-in-right{ animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-scale-in      { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-pulse-critical{ animation: pulseCritical 2s ease-in-out infinite; }
+
+/* ============================================================
+   Scrollbar sombre
+   ============================================================ */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: var(--color-canvas); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-2);
+  border-radius: 5px;
+  border: 2px solid var(--color-canvas);
+}
+::-webkit-scrollbar-thumb:hover { background: #3a465b; }
+
+/* ============================================================
+   Accessibilité — respect de prefers-reduced-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

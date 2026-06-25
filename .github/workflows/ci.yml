@@ -1,0 +1,143 @@
+# ═══════════════════════════════════════════════════════════════
+#  CI/CD — Plateforme IA & BI (Maladies Chroniques)
+#  - CI  : lint + build frontend + smoke-test backend + build Docker
+#  - CD  : publication des images sur GitHub Container Registry (GHCR)
+# ═══════════════════════════════════════════════════════════════
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Annule les runs précédents encore en cours sur la même réf
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ───────────────────────────────────────────────────────────
+  # 1) Backend FastAPI — lint + chargement réel des modèles .pkl
+  # ───────────────────────────────────────────────────────────
+  backend:
+    name: Backend · lint & smoke-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Api_Pfa
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: Api_Pfa/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        continue-on-error: true        # le style ne bloque pas le pipeline
+        run: |
+          pip install ruff
+          ruff check .
+
+      - name: Smoke-test — import de l'app + chargement des modèles
+        # Vérifie que main:app s'importe ET que les 9 .pkl se chargent
+        # avec la version de scikit-learn épinglée (dépickle OK).
+        run: python -c "import main; print('✓ App importée, modèles chargés')"
+
+  # ───────────────────────────────────────────────────────────
+  # 2) Frontend Next.js — lint + build de production
+  # ───────────────────────────────────────────────────────────
+  frontend:
+    name: Frontend · lint & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (eslint)
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  # ───────────────────────────────────────────────────────────
+  # 3) Build des images Docker + publication GHCR (CD)
+  #    - PR            → build seul (validation, pas de push)
+  #    - push main/tag → build + push vers ghcr.io
+  # ───────────────────────────────────────────────────────────
+  images:
+    name: Docker · build & publish (${{ matrix.name }})
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend
+            context: ./Api_Pfa
+          - name: frontend
+            context: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata (tags & labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/pfa-${{ matrix.name }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+            type=ref,event=tag
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=http://localhost:8000
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

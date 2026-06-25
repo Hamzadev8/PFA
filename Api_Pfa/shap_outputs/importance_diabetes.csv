@@ -1,0 +1,9 @@
+feature,shap_mean,disease
+Glucose,1.3629672736478817,diabetes
+BMI,0.8181181760435722,diabetes
+Age,0.5993739603391566,diabetes
+DiabetesPedigreeFunction,0.4987851284077853,diabetes
+Insulin,0.3759680337885919,diabetes
+BloodPressure,0.2573012137773052,diabetes
+Pregnancies,0.2543900955213543,diabetes
+SkinThickness,0.21881138476619927,diabetes

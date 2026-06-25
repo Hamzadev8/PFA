@@ -1,0 +1,65 @@
+# ═══════════════════════════════════════════════════════════════
+# Plateforme IA & BI — Maladies Chroniques
+# Orchestration : base de données + backend FastAPI + frontend Next.js
+# Lancement :  docker compose up -d --build
+# ═══════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Entrepôt de données PostgreSQL ────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: pfa_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB:       ${POSTGRES_DB:-pfa_maladies}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Schéma DWH (vues, index, données de référence) joué à la 1re création
+      - ./Api_Pfa/migrations/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-pfa_maladies}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks: [pfa-net]
+
+  # ── Backend FastAPI (API REST + IA + SHAP + BI) ───────────────
+  backend:
+    build: ./Api_Pfa
+    container_name: pfa_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL:   postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-pfa_maladies}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-pfa2026-CHANGEZ-MOI-en-production}
+      CORS_ORIGINS:   ${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    networks: [pfa-net]
+
+  # ── Frontend Next.js ──────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # URL appelée depuis le NAVIGATEUR → port publié de l'hôte
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: pfa_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks: [pfa-net]
+
+volumes:
+  pgdata:
+
+networks:
+  pfa-net:
+    driver: bridge
